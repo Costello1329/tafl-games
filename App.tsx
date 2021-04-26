@@ -1,21 +1,29 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React from "react";
+import { View, Dimensions } from "react-native";
 
-export default function App() {
+import { Board } from "./src/core/board";
+import { Player } from "./src/core/engine"
+
+/// Brandubh
+import { Brandubh } from "./src/games/brandubh/engine";
+import { BrandubhSkin } from "./src/games/brandubh/skin";
+
+
+
+export default function App () {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
+    <View style={{
+      justifyContent: "center",
+      alignItems: "center",
+      flex: 1,
+      backgroundColor: "rgb(36, 35, 32)",
+    }}>
+      <Board
+        width={Dimensions.get("window").width}
+        engine={new Brandubh()}
+        Skin={BrandubhSkin}
+        onWin={(player: Player): void => alert(`Player ${player} won`)}
+      />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
