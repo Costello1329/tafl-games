@@ -7,6 +7,7 @@ import { Player } from "./src/core/engine"
 /// Brandubh
 import { Brandubh } from "./src/games/brandubh/engine";
 import { BrandubhSkin } from "./src/games/brandubh/skin";
+import { getBrandubhSquareType } from "./src/games/brandubh/background";
 
 
 
@@ -22,7 +23,7 @@ export default function App () {
         width={Dimensions.get("window").width}
         engine={new Brandubh()}
         Skin={BrandubhSkin}
-        onWin={(player: Player): void => alert(`Player ${player} won`)}
+        getSquareType={getBrandubhSquareType}
       />
     </View>
   );

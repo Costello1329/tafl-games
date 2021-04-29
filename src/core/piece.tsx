@@ -63,7 +63,7 @@ export function Piece<FigureType> ({
   
   const movePiece = useCallback(
     (to: Position) => {
-      const moves = engine.moves();
+      const moves: Move[] = engine.moves;
       const from = toPosition({ x: offsetX.value, y: offsetY.value });
       
       const move: Move | undefined = moves.find(move =>

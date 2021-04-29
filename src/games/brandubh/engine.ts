@@ -1,4 +1,4 @@
-import { Player, Figure, Position, Move, Engine } from "../../core/engine";
+import { Player, Figure, Position, Move, Engine, otherPlayer } from "../../core/engine";
 
 
 
@@ -14,12 +14,12 @@ export class Brandubh extends Engine<BrandubhFigureType> {
       (row: number, col: number): Figure<BrandubhFigureType> | null => {
         if (row !== 3 && col !== 3)
           return null;
-        
+
         else if (row === 3 && col === 3)
           return { type: BrandubhFigureType.king, player: Player.white };
-        
+
         const d: number = Math.abs((col === 3 ? row : col) - 3);
-        
+
         if (d === 1)
           return { type: BrandubhFigureType.warrior, player: Player.white };
 
@@ -29,27 +29,30 @@ export class Brandubh extends Engine<BrandubhFigureType> {
     );
   }
 
-  public readonly moves = (): Move[] => {
+  public get name (): string { return "Brandubh"; }
+
+  public get moves (): Move[] {
     let moves: Move[] = [];
 
-    if (this._winner === null)
-      this._board.forEach((_, i) => _.forEach((figure, j) => {
-        if (figure !== null && figure.player === this._player)
+    if (this.winner === null)
+      this.board.forEach((_, i) => _.forEach((figure, j) => {
+        if (figure !== null && figure.player === this.player)
           Brandubh._kDirections.forEach(({ dx, dy }) => {
             for (
               let pos: Position = { row: i + dy, col: j + dx };
-              Brandubh._isValidPosition(pos) &&
+              this._isValidPosition(pos) &&
               this._figureAt(pos) == null && (
                 /// Corner pieces must be accessible only for the king
                 figure.type === BrandubhFigureType.king ||
-                !Brandubh._isCornerPosition(pos)
+                !this._isCornerPosition(pos)
               );
               pos.row += dy, pos.col += dx
             )
-              moves.push({
-                from: { row: i, col: j },
-                to: { row: pos.row, col: pos.col }
-              });
+              if (pos.row !== 3 || pos.col !== 3)
+                moves.push({
+                  from: { row: i, col: j },
+                  to: { row: pos.row, col: pos.col }
+                });
           });
       }));
 
@@ -58,9 +61,11 @@ export class Brandubh extends Engine<BrandubhFigureType> {
 
   /// Move should be validated before passing to the method.
   public readonly move = ({ from, to }: Move): void => {
+    this._supportUndoRedo();
+
     const figure: Figure<BrandubhFigureType> = this._figureAt(from)!;
-    this._board[to.row][to.col] = figure;
-    this._board[from.row][from.col] = null;
+    this.board[to.row][to.col] = figure;
+    this.board[from.row][from.col] = null;
 
     /// Remove captured warriors:
     if (figure.type !== BrandubhFigureType.king) /// King can't capture
@@ -73,64 +78,64 @@ export class Brandubh extends Engine<BrandubhFigureType> {
           this._checkFigure(
             candidate,
             BrandubhFigureType.warrior,
-            Brandubh._otherPlayer(figure.player)
+            otherPlayer(figure.player)
           ) && (
             /// Oposing piece should be either a warrior of the same player or a corner:
             this._checkFigure(oposing, BrandubhFigureType.warrior, figure.player) ||
-            Brandubh._isCornerPosition(oposing)
+            this._isCornerPosition(oposing)
           )
         )
-          this._board[candidate.row][candidate.col] = null;
+          this.board[candidate.row][candidate.col] = null;
       });
 
     const king: Position =
-      this._board
+      this.board
         .map(_ => _.findIndex(figure => figure?.type === BrandubhFigureType.king))
         .map((col: number, row: number): Position => ({ row, col }))
-        .filter(pos => Brandubh._isValidPosition(pos))[0];
+        .filter(pos => this._isValidPosition(pos))[0];
 
     /// White wins
     if (
       /// king reached the corner
-      (figure.type === BrandubhFigureType.king && Brandubh._isCornerPosition(to)) ||
+      (figure.type === BrandubhFigureType.king && this._isCornerPosition(to)) ||
       /// all black figures are death
-      !this._board.some(_ => _.some(figure => figure?.player === Player.black))
+      !this.board.some(_ => _.some(figure => figure?.player === Player.black))
     )
-      this._winner = Player.white;
+      this._setWinner(Player.white);
 
     /// Black wins
     else if (
       Brandubh._kDirections
         .map(({ dx, dy }): Position => ({ row: king.row + dy, col: king.col + dx }))
         .every((candidate: Position): boolean =>
-          !Brandubh._isValidPosition(candidate) ||
+          !this._isValidPosition(candidate) ||
           this._checkFigure(candidate, BrandubhFigureType.warrior, Player.black)
         )
     )
-      this._winner = Player.black;
+      this._setWinner(Player.black);
   
-    this._player = Brandubh._otherPlayer(this._player);
+    this._nextPlayer();
   }
 
-  private static readonly _isValidPosition =
+  private readonly _isValidPosition =
     (position: Position): boolean =>
-      position.row >= 0 && position.row < 7 &&
-      position.col >= 0 && position.col < 7;
+      position.row >= 0 && position.row < this.height &&
+      position.col >= 0 && position.col < this.width;
 
-  private static readonly _isCornerPosition =
+  private readonly _isCornerPosition =
     (position: Position): boolean =>
       (position.col === 0 && position.row === 0) ||
-      (position.col === 0 && position.row === 6) ||
-      (position.col === 6 && position.row === 0) ||
-      (position.col === 6 && position.row === 6);
+      (position.col === 0 && position.row === this.height - 1) ||
+      (position.col === this.width - 1 && position.row === 0) ||
+      (position.col === this.width - 1 && position.row === this.height - 1);
 
   private readonly _figureAt =
     (position: Position): Figure<BrandubhFigureType> | null =>
-      this._board[position.row][position.col];
+      this.board[position.row][position.col];
 
   private readonly _checkFigure =
     (position: Position, type: BrandubhFigureType, player: Player): boolean => {
-      if (!Brandubh._isValidPosition(position))
+      if (!this._isValidPosition(position))
         return false;
       
       const figure: Figure<BrandubhFigureType> | null = this._figureAt(position);
@@ -142,10 +147,6 @@ export class Brandubh extends Engine<BrandubhFigureType> {
       );
     }
 
-  private static readonly _otherPlayer =
-    (player: Player) =>
-      player === Player.white ? Player.black : Player.white;
-  
   private static readonly _kDirections: { dx: number, dy: number }[] =
     [
       { dx: -1, dy: 0 },
