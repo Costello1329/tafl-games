@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react"
-import { View, Button, Alert, Text, TouchableOpacity } from "react-native"
+import { View, Alert, Text, TouchableOpacity, Button } from "react-native"
 
 import { Background, GetSquareType } from "./background";
 import { Piece, PieceSkin } from "./piece";
@@ -13,15 +13,16 @@ interface BottomBoardButton {
   action: () => void
 }
 
-interface BoardProps<FigureType> {
+export interface BoardProps<FigureType> {
   width: number,
   engine: Engine<FigureType>,
   Skin: PieceSkin<FigureType>,
-  getSquareType: GetSquareType
+  getSquareType: GetSquareType,
+  goToMenu: () => void
 }
 
 export function Board<FigureType> (
-  { width, engine, Skin, getSquareType } : BoardProps<FigureType>
+  { width, engine, Skin, getSquareType, goToMenu } : BoardProps<FigureType>
 ) {
     const [state, setState] = useState({
       board: engine.board,
@@ -54,7 +55,7 @@ export function Board<FigureType> (
           }
         }, {
           text: "Go to menu",
-          onPress: () => alert("MENU")
+          onPress: goToMenu
         }]
       )
     }
@@ -98,12 +99,35 @@ export function Board<FigureType> (
 
     return (
       <React.Fragment>
-        <Text style={{
-          textAlign: "center",
-          fontSize: 32,
-          color: "white",
-          marginBottom: 15
-        }}>{engine.name}</Text>
+        <View style={{ flexDirection: "row" }}>
+          <View style={{ position: "absolute", top: 4, zIndex: 1 }}>
+            <Button
+              title={"Menu"}
+              color={"white"}
+              onPress={() => {
+                Alert.alert(
+                  "Go to menu?",
+                  "Are you sure that you want to return back to the menu? " +
+                  "Current game won't be saved then.",
+                  [{
+                    text: "Yes",
+                    style: "destructive",
+                    onPress: goToMenu
+                  }, {
+                    text: "No"
+                  }]
+                );
+              }}
+            />
+          </View>
+          <Text style={{
+            textAlign: "center",
+            fontSize: 32,
+            color: "white",
+            marginBottom: 15,
+            flex: 1,
+          }}>{engine.name}</Text>
+        </View>
         <View style={{ width: width, height: width / boardWidth * boardHeight }}>
           <Background
             squareSize={width / boardWidth}
@@ -132,23 +156,30 @@ export function Board<FigureType> (
             )
           }
         </View>
-        <View style={{
-          marginTop: 10,
-          flexDirection: "row"
-        }}>{buttons.map((button: BottomBoardButton, i: number): JSX.Element => 
-          <View style={{ flex: 1 }} key={`bottom-board-button-${i}`}>
-            <TouchableOpacity onPress={button.action} disabled={!button.enabled}>
-              <Text style={{
-                color: button.enabled ? "white" : "gray",
-                fontSize: 20,
-                textAlign: "center",
-                textAlignVertical: "center"
-              }}>
-                {button.title}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        )}</View>
+        <View style={{flexDirection: "row"}}>{
+          buttons.map((button: BottomBoardButton, i: number): JSX.Element => 
+            <View style={{
+              flex: 1,
+              borderLeftWidth: i !== 0 ? 1 : 0,
+              borderRightWidth: i !== buttons.length - 1 ? 1 : 0,
+              borderBottomWidth: 2,
+              borderColor: "grey",
+              borderBottomColor: "black"
+            }} key={`bottom-board-button-${i}`}>
+              <TouchableOpacity onPress={button.action} disabled={!button.enabled}>
+                <Text style={{
+                  color: button.enabled ? "white" : "gray",
+                  fontSize: 20,
+                  textAlign: "center",
+                  textAlignVertical: "center",
+                  backgroundColor: "rgb(75, 75, 75)",
+                  paddingVertical: 10
+                }}>
+                  {button.title}
+                </Text>
+              </TouchableOpacity>
+            </View>)
+        }</View>
       </React.Fragment>
     );
   };

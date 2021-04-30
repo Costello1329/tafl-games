@@ -1,5 +1,4 @@
 import React, { useCallback } from "react";
-import { View } from "react-native";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import Animated, {
   runOnJS,
