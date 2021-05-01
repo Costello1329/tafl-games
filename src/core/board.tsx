@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react"
 import { View, Alert, Text, TouchableOpacity, Button } from "react-native"
 
-import { Background, GetSquareType } from "./background";
+import { Background, BackgroundSkin } from "./background";
 import { Piece, PieceSkin } from "./piece";
 import { Engine } from "./engine";
 
@@ -16,13 +16,13 @@ interface BottomBoardButton {
 export interface BoardProps<FigureType> {
   width: number,
   engine: Engine<FigureType>,
-  Skin: PieceSkin<FigureType>,
-  getSquareType: GetSquareType,
-  goToMenu: () => void
+  goToMenu: () => void,
+  pieceSkin: PieceSkin<FigureType>,
+  backgroundSkin: BackgroundSkin
 }
 
 export function Board<FigureType> (
-  { width, engine, Skin, getSquareType, goToMenu } : BoardProps<FigureType>
+  { width, engine, goToMenu, pieceSkin, backgroundSkin } : BoardProps<FigureType>
 ) {
     const [state, setState] = useState({
       board: engine.board,
@@ -128,12 +128,17 @@ export function Board<FigureType> (
             flex: 1,
           }}>{engine.name}</Text>
         </View>
-        <View style={{ width: width, height: width / boardWidth * boardHeight }}>
+        <View style={{
+          width: width,
+          height: width / boardWidth * boardHeight
+        }}>
           <Background
-            squareSize={width / boardWidth}
+            size={width / boardWidth}
             width={boardWidth}
             height={boardHeight}
-            getSquareType={getSquareType}
+            firstColor={backgroundSkin.firstColor}
+            secondColor={backgroundSkin.secondColor}
+            SquareContents={backgroundSkin.SquareContents}
           />
           {
             state.board.map((row, y) =>
@@ -149,7 +154,7 @@ export function Board<FigureType> (
                   onTurn={onTurn}
                   enabled={state.player === piece.player && state.winner === null}
                   figure={{ ... piece }}
-                  Skin={Skin}
+                  Skin={pieceSkin}
                 /> :
                 null
               )
@@ -164,19 +169,22 @@ export function Board<FigureType> (
               borderRightWidth: i !== buttons.length - 1 ? 1 : 0,
               borderBottomWidth: 2,
               borderColor: "grey",
-              borderBottomColor: "black"
+              borderBottomColor: "black",
+              borderLeftColor: "black",
+              borderRightColor: "black",
+              backgroundColor: "rgb(32, 42, 56)",
+              paddingVertical: 10,
+              borderBottomRightRadius: 10,
+              borderBottomLeftRadius: 10,
+              borderTopColor: "black"
             }} key={`bottom-board-button-${i}`}>
               <TouchableOpacity onPress={button.action} disabled={!button.enabled}>
                 <Text style={{
-                  color: button.enabled ? "white" : "gray",
-                  fontSize: 20,
                   textAlign: "center",
                   textAlignVertical: "center",
-                  backgroundColor: "rgb(75, 75, 75)",
-                  paddingVertical: 10
-                }}>
-                  {button.title}
-                </Text>
+                  color: button.enabled ? "white" : "gray",
+                  fontSize: 20
+                }}>{button.title}</Text>
               </TouchableOpacity>
             </View>)
         }</View>

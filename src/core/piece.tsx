@@ -7,23 +7,22 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { Vector } from "react-native-redash";
 
-import { Engine, Position, Figure, Move } from "./engine";
+import { Engine, Figure, Move } from "./engine";
+import { Vector } from "../utils/vector";
 
 
 
-const getToTranslation = (size: number) =>
-  (to: Position) => {
-    "worklet";
-    return { x: to.col * size, y: to.row * size };
-  };
 
-const getToPosition = (size: number) =>
-  ({ x, y }: Vector): Position => {
-    "worklet";
-    return { col: Math.round(x / size), row: Math.round(y / size) };
-  };
+const toTranslation = (size: number, vec: Vector) => {
+  "worklet";
+  return { x: size * vec.x, y: size * vec.y };
+}
+
+const toPosition = (size: number, vec: Vector) => {
+  "worklet";
+  return { x: Math.round(vec.x / size), y: Math.round(vec.y / size) };
+}
 
 
 export type PieceSkinProps<FigureType> = { figure: Figure<FigureType>, size: number };
@@ -52,8 +51,6 @@ export function Piece<FigureType> ({
   figure,
   Skin
 }: PieceProps<FigureType>) {
-  const toTranslation = getToTranslation(size);
-  const toPosition = getToPosition(size);
   const isGestureActive = useSharedValue(false);
   const offsetX = useSharedValue(0);
   const offsetY = useSharedValue(0);
@@ -61,18 +58,18 @@ export function Piece<FigureType> ({
   const translateY = useSharedValue(position.y * size);
   
   const movePiece = useCallback(
-    (to: Position) => {
+    (to: Vector) => {
       const moves: Move[] = engine.moves;
-      const from = toPosition({ x: offsetX.value, y: offsetY.value });
+      const from = toPosition(size, { x: offsetX.value, y: offsetY.value });
       
       const move: Move | undefined = moves.find(move =>
-        move.from.col === from.col &&
-        move.from.row === from.row &&
-        move.to.col === to.col &&
-        move.to.row === to.row
+        move.from.x === from.x &&
+        move.from.y === from.y &&
+        move.to.x === to.x &&
+        move.to.y === to.y
       );
 
-      const { x, y } = toTranslation(move !== undefined ? move.to : from);
+      const { x, y } = toTranslation(size, move !== undefined ? move.to : from);
       
       translateX.value = withTiming(x, {}, () => (
         offsetX.value = translateX.value
@@ -101,7 +98,7 @@ export function Piece<FigureType> ({
       translateY.value = offsetY.value + translationY;
     },
     onEnd: () =>
-      runOnJS(movePiece)(toPosition({ x: translateX.value, y: translateY.value }))
+      runOnJS(movePiece)(toPosition(size, { x: translateX.value, y: translateY.value }))
   });
 
   const style = useAnimatedStyle(() => ({
@@ -127,8 +124,8 @@ export function Piece<FigureType> ({
   });
 
   const underlay = useAnimatedStyle(() => {
-    const position = toPosition({ x: translateX.value, y: translateY.value });
-    const translation = toTranslation(position);
+    const position = toPosition(size, { x: translateX.value, y: translateY.value });
+    const translation = toTranslation(size, position);
     return {
       position: "absolute",
       width: size,
@@ -139,10 +136,8 @@ export function Piece<FigureType> ({
         : "transparent",
       transform: [{ translateX: translation.x }, { translateY: translation.y }],
       opacity: (
-        position.col >= 0 &&
-        position.row >= 0 &&
-        position.col < width &&
-        position.row < height
+        position.x >= 0 && position.x < width &&
+        position.y >= 0 && position.y < height
       ) ? 1 : 0
     };
   });

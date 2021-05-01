@@ -3,12 +3,12 @@ import { View, StyleProp, ViewStyle } from "react-native";
 
 import { Player } from "../../core/engine";
 import { PieceSkinProps } from "../../core/piece";
-import { BrandubhFigureType } from "./engine";
+import { TaflFigureType } from "./engines/main";
 
 
 
-export const BrandubhSkin = ({ size, figure }: PieceSkinProps<BrandubhFigureType>) => {
-  const figureSize: number = figure.type === BrandubhFigureType.king ? size - 10 : size - 20;
+export const taflPieceSkin = ({ size, figure }: PieceSkinProps<TaflFigureType>) => {
+  const figureSize: number = figure.type === TaflFigureType.king ? size - 10 : size - 20;
   const figureBorder: number = 2;
   const black: string = "rgb(100, 0, 0)";
   const white: string = "rgb(255, 255, 255)";
@@ -33,11 +33,11 @@ export const BrandubhSkin = ({ size, figure }: PieceSkinProps<BrandubhFigureType
       width: figureSize,
       height: figureSize,
       borderWidth: figureBorder,
-      borderColor: figure.type === BrandubhFigureType.king ? gold : "black",
+      borderColor: figure.type === TaflFigureType.king ? gold : "black",
       borderRadius: figureSize / 3,
       margin: (size - figureSize) / 2
     }}>{
-      figure.type === BrandubhFigureType.king ?
+      figure.type === TaflFigureType.king ?
       <React.Fragment>
         <View style={{ ... lineStyle }}></View>
         <View style={{ ... lineStyle, transform: [{ rotate: "90deg" }] }}></View>

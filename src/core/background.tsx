@@ -1,75 +1,54 @@
 import React from "react";
-import { View, Text, ColorValue, StyleProp, ViewStyle } from "react-native";
+import { View, Text, ColorValue } from "react-native";
 
-
-
-export enum SquareType {
-  Normal = "normal",
-  Cross = "cross"
-}
-
-export type GetSquareType = (row: number, col: number) => SquareType;
 
 
 interface SquareProps extends RowProps {
-  col: number;
+  col: number
 }
 
+export type SquareContentsProps = Pick<SquareProps, "size" | "row" | "col" | "width" | "height">;
+
+const getLetter = (col: number): string =>
+  String.fromCharCode("a".charCodeAt(0) + (col % 26)) + (col > 26 ? Math.floor(col / 1) : "");
+
 const Square: React.FunctionComponent<SquareProps> =
-  ({ squareSize, height, row, col, getSquareType }: SquareProps) => {
-    const dark: ColorValue = "rgb(100, 133, 68)";
-    const light: ColorValue = "rgb(230, 233, 198)";
+  ({ size, width, height, row, col, firstColor, secondColor, SquareContents }: SquareProps) => {
 
-    const lineHeight: number = squareSize - 10;
-    const lineWidth: number = 4;
-
-    const lineStyle: StyleProp<ViewStyle> = {
-      width: lineWidth,
-      height: lineHeight,
-      backgroundColor: dark,
-      position: "absolute",
-      left: squareSize / 2 - lineWidth / 2,
-      top: (squareSize - lineHeight) / 2,
-      opacity: 0.5,
-      borderRadius: lineWidth / 2
-    };
+    const color = (col + row) % 2 === 0 ? firstColor : secondColor;
+    const textColor = (col + row) % 2 === 0 ? secondColor : firstColor;
 
     return (
       <View style={{
         flex: 1,
-        backgroundColor: (col + row) % 2 ? dark : light,
         padding: 4,
         justifyContent: "space-between"
       }}>
-        {
-          getSquareType(row, col) === SquareType.Cross ?
-          <React.Fragment>
-            <View style={{
-              ... lineStyle,
-              transform: [{ rotate: "45deg" }]
-            }}></View>
-            <View style={{
-              ... lineStyle,
-              transform: [{ rotate: "-45deg" }]
-            }}></View>
-          </React.Fragment> :
-          null
-        }
-        <Text style={{
-          color: (col + row) % 2 ? light : dark,
-          fontWeight: "500",
-          opacity: col === 0 ? 1 : 0
+        <View style={{
+          backgroundColor: color,
+          position: "absolute",
+          width: size,
+          height: size
         }}>
-          {height - row}
-        </Text>
-        <Text style={{
-          color: (col + row) % 2 ? light : dark,
-          fontWeight: "500",
-          alignSelf: "flex-end",
-          opacity: row === height - 1 ? 1 : 0
-        }}>
-          {String.fromCharCode("a".charCodeAt(0) + col)}
-        </Text>
+          <SquareContents size={size} row={row} col={col} width={width} height={height}/>
+        </View>
+        <React.Fragment>
+          <Text style={{
+            opacity: col === 0 ? 1 : 0,
+            color: textColor,
+            fontWeight: "500"
+          }}>
+            {height - row}
+          </Text>
+          <Text style={{
+            opacity: row === height - 1 ? 1 : 0,
+            color: textColor,
+            fontWeight: "500",
+            justifyContent: "flex-end"
+          }}>
+            {getLetter(col)}
+          </Text>
+        </React.Fragment>
       </View>
     );
   };
@@ -80,39 +59,48 @@ interface RowProps extends BackgroundProps {
 }
 
 const Row: React.FunctionComponent<RowProps> =
-  ({ squareSize, width, height, row, getSquareType }: RowProps): JSX.Element =>
+  ({ size, width, height, row, firstColor, secondColor, SquareContents }: RowProps): JSX.Element =>
     <View style={{ flex: 1, flexDirection: "row" }}>{
       new Array<number>(width).fill(0).map((_, i) =>
         <Square
-          squareSize={squareSize}
+          size={size}
           width={width}
           height={height}
           key={`SQUARE-${row}-${i}`}
           row={row}
           col={i}
-          getSquareType={getSquareType}
+          firstColor={firstColor}
+          secondColor={secondColor}
+          SquareContents={SquareContents}
         />)
     }</View>;
 
 
-interface BackgroundProps {
-  squareSize: number,
+export interface BackgroundSkin {
+  firstColor: ColorValue,
+  secondColor: ColorValue,
+  SquareContents: React.FunctionComponent<SquareContentsProps>
+}
+
+interface BackgroundProps extends BackgroundSkin {
+  size: number,
   width: number,
-  height: number,
-  getSquareType: (row: number, col: number) => SquareType
+  height: number
 }
 
 export const Background: React.FunctionComponent<BackgroundProps> =
-  ({ squareSize, width, height, getSquareType } : BackgroundProps) =>
+  ({ size, width, height, SquareContents, firstColor, secondColor } : BackgroundProps) =>
     <View style={{ flex: 1 }}>{
       new Array<number>(height).fill(0).map((_, i) =>
         <Row
-          squareSize={squareSize}
+          key={`ROW-${i}`}
+          size={size}
           width={width}
           height={height}
-          key={`ROW-${i}`}
+          SquareContents={SquareContents}
+          firstColor={firstColor}
+          secondColor={secondColor}
           row={i}
-          getSquareType={getSquareType}
         />
       )
     }</View>;

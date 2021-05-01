@@ -1,4 +1,5 @@
 import { ObjectHelper } from "../utils/deepCopy";
+import { makeVector, Vector } from "../utils/vector";
 
 
 
@@ -20,18 +21,12 @@ type FieldCell<FigureType> = Figure<FigureType> | null;
 type FieldRow<FigureType> = FieldCell<FigureType>[];
 export type Field<FigureType> = FieldRow<FigureType>[];
 
-export type FigurePlacer<FigureType> =
-  (row: number, col: number) => FieldCell<FigureType>;
+export type FigurePlacer<FigureType> = (_: Vector) => FieldCell<FigureType>;
 
-
-export interface Position {
-  row: number,
-  col: number
-}
 
 export interface Move {
-  from: Position;
-  to: Position;
+  from: Vector;
+  to: Vector;
 }
 
 
@@ -60,7 +55,7 @@ export abstract class Engine<FigureType> {
 
     for (let i = 0; i < this._height; i ++)
       for (let j = 0; j < this._width; j ++)
-        this._initialState._board[i][j] = placeFigure(i, j);
+        this._initialState._board[i][j] = placeFigure(makeVector(i, j));
 
     /// Deep copy in order to copy the board
     this._state = ObjectHelper.deepCopy<BoardState<FigureType>>(this._initialState);
@@ -72,6 +67,7 @@ export abstract class Engine<FigureType> {
   public abstract get name (): string;
 
   public abstract get moves (): Move[];
+  /// Move should be validated before passing to the method.
   public abstract readonly move: (_: Move) => void;
   
   public get board (): Field<FigureType> { return this._state._board; }

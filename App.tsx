@@ -3,19 +3,23 @@ import { View, ScrollView, SafeAreaView, Dimensions, Text, TouchableOpacity } fr
 
 import { Board } from "./src/core/board";
 
-/// Brandubh
-import { Brandubh } from "./src/games/brandubh/engine";
-import { BrandubhSkin } from "./src/games/brandubh/skin";
-import { getBrandubhSquareType } from "./src/games/brandubh/background";
+import { BrandubhEngine } from "./src/games/tafl/engines/brandubh";
+import { ArdRiEngine } from "./src/games/tafl/engines/ardRi";
+import { taflPieceSkin } from "./src/games/tafl/skin";
+import { taflBackgroundSkin } from "./src/games/tafl/background";
 
 
 
 const windowWidth = Dimensions.get("window").width;
 
 const games = [{
-  engine: new Brandubh(),
-  Skin: BrandubhSkin,
-  getSquareType: getBrandubhSquareType
+  engine: new BrandubhEngine(),
+  pieceSkin: taflPieceSkin,
+  backgroundSkin: taflBackgroundSkin
+}, {
+  engine: new ArdRiEngine(),
+  pieceSkin: taflPieceSkin,
+  backgroundSkin: taflBackgroundSkin
 }];
 
 
@@ -24,26 +28,28 @@ export default function App () {
 
   return (
     <View style={{
-      justifyContent: "center",
-      alignItems: "center",
+      flexDirection: "column",
       flex: 1,
-      backgroundColor: "rgb(35, 35, 35)",
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: "rgb(35, 35, 35)"
     }}>{
       game === null ?
-      <SafeAreaView style={{ width: windowWidth }}>
-        <ScrollView style={{ width: windowWidth }}>
-          <View>
-            <Text style={{
-              color: "white",
-              fontSize: 48,
-              textAlign: "center",
-              textAlignVertical: "center",
-              marginVertical: 40
-            }}>Tafl games</Text>
-          </View>
-          <View style={{
-            alignItems: "center"
-          }}>{
+      <SafeAreaView>
+        <View>
+          <Text style={{
+            color: "white",
+            fontSize: 48,
+            textAlign: "center",
+            paddingVertical: 40
+          }}>Tafl games</Text>
+        <ScrollView contentContainerStyle={{
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          flex: 1
+        }}>
+          <View>{
             games.map(({ engine }, game: number) =>
               <TouchableOpacity
                 key={`select-game-button ${game}`}
@@ -65,6 +71,7 @@ export default function App () {
               </TouchableOpacity>)
           }</View>
         </ScrollView>
+        </View>
       </SafeAreaView> :
       <Board
         {... games[game]}
