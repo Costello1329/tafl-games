@@ -5,6 +5,8 @@ import { Board } from "./src/core/board";
 
 import { BrandubhEngine } from "./src/games/tafl/engines/brandubh";
 import { ArdRiEngine } from "./src/games/tafl/engines/ardRi";
+import { TablutEngine } from "./src/games/tafl/engines/tablut";
+
 import { taflPieceSkin } from "./src/games/tafl/skin";
 import { taflBackgroundSkin } from "./src/games/tafl/background";
 
@@ -18,6 +20,10 @@ const games = [{
   backgroundSkin: taflBackgroundSkin
 }, {
   engine: new ArdRiEngine(),
+  pieceSkin: taflPieceSkin,
+  backgroundSkin: taflBackgroundSkin
+}, {
+  engine: new TablutEngine(),
   pieceSkin: taflPieceSkin,
   backgroundSkin: taflBackgroundSkin
 }];

@@ -84,7 +84,7 @@ export abstract class TaflEngine extends Engine<TaflFigureType> {
     this.board[from.y][from.x] = null;
 
     /// Remove captured warriors:
-    if (figure.type !== TaflFigureType.king || !this._kingSetup.canCapture)
+    if (figure.type !== TaflFigureType.king || this._kingSetup.canCapture)
       directions.forEach((dir: Vector) => {
         const candidate: Vector = sum(to, dir);
         const oposing: Vector = sum(to, product(2, dir));

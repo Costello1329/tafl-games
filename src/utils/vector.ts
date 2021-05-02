@@ -27,9 +27,19 @@ export const distanceLInf =
     Math.max(Math.abs(first.x - second.x), Math.abs(first.y - second.y));
 
 export const distanceLp =
-  (first: Vector, second: Vector, p: number) =>
-    Math.pow(
-      Math.abs(Math.pow(first.x - second.x, p)) + Math.abs(Math.pow(first.y - second.y, p)),
+  (first: Vector, second: Vector, p: number) => {
+    let res = Math.pow(
+      Math.abs(Math.pow(first.x - second.x, p)) +
+        Math.abs(Math.pow(first.y - second.y, p)),
       1 / p
     );
+
+    if (p === 1)
+      res = Math.floor(res);
+
+    return res;
+  }
   
+export const distanceRook =
+  (first: Vector, second: Vector) =>
+    (first.x === second.x || first.y === second.y) ? distanceLp(first, second, 1) : 0;

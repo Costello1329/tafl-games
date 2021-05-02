@@ -15,8 +15,8 @@ export class ArdRiEngine extends TaflEngine {
   constructor () {
     super(
       7, /// Board size
-      { moveDistance: 1 },
-      { moveDistance: 1, canCapture: true, canReturnToThrone: true },
+      { moveDistance: 1 }, /// Warriors settings
+      { moveDistance: 1, canCapture: true, canReturnToThrone: true }, /// King settings
       (vec: Vector): Figure<TaflFigureType> | null => {
         const center: Vector = { x: 3, y: 3 };
 
