@@ -12,19 +12,16 @@ export class BrandubhEngine extends TaflEngine {
       { moveDistance: 7, canCapture: true, canReturnToThrone: false }, /// King settings
       (vec: Vector): Figure<TaflFigureType> | null => {
         const center: Vector = { x: 3, y: 3 };
+        const d = distanceRook(vec, center);
 
         if (distanceLp(vec, center, 1) === 0)
           return { type: TaflFigureType.king, player: Player.white };
 
-        else if (
-          directions
-            .map((dir: Vector): Vector => sum(center, product(3, dir)))
-            .some((attractor: Vector): boolean => distanceLp(attractor, vec, 1) <= 1)
-        )
-          return { type: TaflFigureType.warrior, player: Player.black };
-
-        else if (distanceRook(vec, center) > 0)
+        else if (d === 1)
           return { type: TaflFigureType.warrior, player: Player.white };
+
+        else if (d >= 2)
+          return { type: TaflFigureType.warrior, player: Player.black };
 
         else
           return null;

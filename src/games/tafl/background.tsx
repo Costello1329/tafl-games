@@ -7,7 +7,7 @@ import { BackgroundSkin, SquareContentsProps } from "../../core/background";
 
 export const taflBackgroundSkin: BackgroundSkin = {
   firstColor: "white",
-  secondColor: "black",
+  secondColor: "rgb(90, 90, 135)",
   SquareContents: ({ size, row, col, width, height }: SquareContentsProps) => {
     const lineHeight: number = size - 15;
     const lineWidth: number = 4;

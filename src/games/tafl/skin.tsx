@@ -10,9 +10,9 @@ import { TaflFigureType } from "./engines/main";
 export const taflPieceSkin = ({ size, figure }: PieceSkinProps<TaflFigureType>) => {
   const figureSize: number = figure.type === TaflFigureType.king ? size - 10 : size - 20;
   const figureBorder: number = 2;
-  const black: string = "rgb(100, 0, 0)";
+  const black: string = "rgb(150, 0, 0)";
   const white: string = "rgb(255, 255, 255)";
-  const gold: string = "rgb(212, 175, 55)";
+  const gold: string = "rgb(180, 160, 45)";
 
   const lineWidth: number = 5;
   const lineHeight: number = size - 30;
